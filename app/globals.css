@@ -2,95 +2,279 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ─────────────────────────────────────────────────────────────
+   DESIGN TOKENS
+   Deep blue primary · Slate neutrals · Clean white cards
+   ───────────────────────────────────────────────────────────── */
+
 @layer base {
   :root {
-    --background: 210 20% 98%;
-    --foreground: 215 25% 12%;
+    /* ── Surfaces ── */
+    --background:        214 32% 97%;   /* slate-50 warm: #F1F5F9 */
+    --foreground:        222 47% 11%;   /* slate-950: #0F172A     */
 
-    --card: 0 0% 100%;
-    --card-foreground: 215 25% 12%;
+    --card:              0 0% 100%;     /* pure white cards       */
+    --card-foreground:   222 47% 11%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 215 25% 12%;
+    --popover:           0 0% 100%;
+    --popover-foreground: 222 47% 11%;
 
-    /* Primary: calm teal-blue */
-    --primary: 199 89% 40%;
+    /* ── Brand — Deep Blue ── */
+    --primary:           221 83% 53%;  /* blue-600: #2563EB      */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 16% 93%;
-    --secondary-foreground: 215 20% 30%;
+    /* ── Neutral scale ── */
+    --secondary:         214 32% 91%;  /* slate-200: #E2E8F0     */
+    --secondary-foreground: 215 28% 35%;
 
-    --muted: 210 16% 93%;
-    --muted-foreground: 215 14% 50%;
+    --muted:             214 32% 91%;
+    --muted-foreground:  215 16% 47%;  /* slate-500: #64748B     */
 
-    --accent: 199 60% 92%;
-    --accent-foreground: 199 89% 30%;
+    /* ── Accent — light blue tint (hover/focus surfaces) ── */
+    --accent:            214 100% 97%; /* blue-50: #EFF6FF       */
+    --accent-foreground: 221 83% 43%;
 
-    --destructive: 0 72% 51%;
+    /* ── Semantic ── */
+    --destructive:        0  84% 60%;  /* red-500: #EF4444       */
     --destructive-foreground: 0 0% 100%;
 
-    --border: 214 20% 88%;
-    --input: 214 20% 88%;
-    --ring: 199 89% 40%;
+    --success:           142 71% 45%;  /* green-500: #22C55E     */
+    --success-foreground: 0 0% 100%;
 
-    --radius: 0.75rem;
+    --warning:           38  92% 50%;  /* amber-500: #F59E0B     */
+    --warning-foreground: 0 0% 100%;
 
-    --font-sans: "Inter", "system-ui", sans-serif;
+    /* ── Chrome ── */
+    --border:            214 32% 89%;  /* slate-200 slightly darker */
+    --input:             214 32% 89%;
+    --ring:              221 83% 53%;
+
+    /* ── Geometry ── */
+    --radius:            0.875rem;     /* 14px */
+    --radius-sm:         0.5rem;       /* 8px  */
+    --radius-lg:         1.25rem;      /* 20px */
+    --radius-xl:         1.5rem;       /* 24px */
+
+    /* ── Shadows (blue-tinted for premium feel) ── */
+    --shadow-xs:   0 1px 2px 0 hsl(222 47% 11% / 0.04);
+    --shadow-sm:   0 1px 3px 0 hsl(222 47% 11% / 0.06), 0 1px 2px -1px hsl(222 47% 11% / 0.04);
+    --shadow-md:   0 4px 6px -1px hsl(222 47% 11% / 0.07), 0 2px 4px -2px hsl(222 47% 11% / 0.05);
+    --shadow-lg:   0 10px 15px -3px hsl(221 83% 53% / 0.08), 0 4px 6px -4px hsl(222 47% 11% / 0.06);
+    --shadow-xl:   0 20px 25px -5px hsl(221 83% 53% / 0.10), 0 8px 10px -6px hsl(222 47% 11% / 0.08);
+    --shadow-card: 0 1px 3px 0 hsl(222 47% 11% / 0.06), 0 0 0 1px hsl(214 32% 89% / 0.6);
+
+    /* ── Typography ── */
+    --font-sans:   "Inter", "system-ui", sans-serif;
+    --font-mono:   "JetBrains Mono", "Fira Code", monospace;
+
+    /* ── Triage levels ── */
+    --triage-emergency-bg:   0 100% 97%;
+    --triage-emergency-fg:   0 84% 42%;
+    --triage-emergency-border: 0 84% 88%;
+
+    --triage-urgent-bg:      24 100% 97%;
+    --triage-urgent-fg:      21 90% 38%;
+    --triage-urgent-border:  21 90% 86%;
+
+    --triage-semiurgent-bg:  48 100% 96%;
+    --triage-semiurgent-fg:  32 95% 35%;
+    --triage-semiurgent-border: 48 96% 83%;
+
+    --triage-nonurgent-bg:   138 76% 97%;
+    --triage-nonurgent-fg:   142 72% 29%;
+    --triage-nonurgent-border: 141 69% 83%;
+
+    --triage-selfcare-bg:    214 100% 97%;
+    --triage-selfcare-fg:    221 83% 40%;
+    --triage-selfcare-border: 214 89% 84%;
   }
 
-  * {
+  /* ── Global resets ── */
+  *, *::before, *::after {
     @apply border-border;
+    box-sizing: border-box;
+  }
+
+  html {
+    -webkit-tap-highlight-color: transparent;
+    text-rendering: optimizeLegibility;
   }
 
   body {
-    @apply bg-background text-foreground;
-    font-feature-settings: "rlig" 1, "calt" 1;
+    @apply bg-background text-foreground antialiased;
+    font-family: var(--font-sans);
+    font-feature-settings: "rlig" 1, "calt" 1, "ss01" 1;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
 
-  /* Mobile-first safe area handling */
-  .safe-top {
-    padding-top: env(safe-area-inset-top);
+  /* ── Focus management ── */
+  :focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
   }
 
-  .safe-bottom {
-    padding-bottom: env(safe-area-inset-bottom);
+  /* ── Selection ── */
+  ::selection {
+    background-color: hsl(var(--primary) / 0.15);
+    color: hsl(var(--primary));
+  }
+
+  /* ── Refined scrollbar ── */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--border));
+    border-radius: 99px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground) / 0.4);
+  }
+
+  /* ── Type scale ── */
+  h1, h2, h3, h4, h5, h6 {
+    font-feature-settings: "rlig" 1, "calt" 1, "ss01" 1;
+    letter-spacing: -0.015em;
   }
 }
 
+/* ─────────────────────────────────────────────────────────────
+   COMPONENT LAYER
+   Utility classes shared across pages
+   ───────────────────────────────────────────────────────────── */
+
 @layer components {
-  /* Page container — max-width centered for mobile-first */
+
+  /* ── Layout scaffolding ── */
   .page-container {
     @apply mx-auto w-full max-w-md px-4;
   }
 
-  /* Screen-height full page with bottom nav clearance */
-  .screen {
-    @apply min-h-screen pb-24;
+  .page-container-wide {
+    @apply mx-auto w-full max-w-2xl px-4;
   }
 
-  /* Card hover lift */
-  .card-hover {
-    @apply transition-shadow duration-200 hover:shadow-md;
+  /* clearance below fixed bottom nav */
+  .screen {
+    @apply min-h-screen pb-28;
+  }
+
+  /* ── Safe areas (notch / home-indicator) ── */
+  .safe-top    { padding-top: env(safe-area-inset-top);    }
+  .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+  .safe-left   { padding-left: env(safe-area-inset-left);  }
+  .safe-right  { padding-right: env(safe-area-inset-right); }
+
+  /* ── Card styles ── */
+  .card-base {
+    @apply rounded-[var(--radius-lg)] bg-card;
+    box-shadow: var(--shadow-card);
+  }
+
+  .card-interactive {
+    @apply card-base cursor-pointer transition-all duration-150;
+    @apply active:scale-[0.985] active:shadow-none;
+  }
+
+  .card-interactive:hover {
+    box-shadow: var(--shadow-md);
+  }
+
+  /* ── Triage semantic surfaces ── */
+  .triage-emergency  { @apply bg-red-50    border border-red-200    text-red-800;    }
+  .triage-urgent     { @apply bg-orange-50 border border-orange-200 text-orange-800; }
+  .triage-semiurgent { @apply bg-amber-50  border border-amber-200  text-amber-800;  }
+  .triage-nonurgent  { @apply bg-green-50  border border-green-200  text-green-800;  }
+  .triage-selfcare   { @apply bg-blue-50   border border-blue-200   text-blue-800;   }
+
+  /* ── Divider with label ── */
+  .divider-label {
+    @apply flex items-center gap-3 text-xs font-medium uppercase tracking-widest text-muted-foreground;
+  }
+  .divider-label::before,
+  .divider-label::after {
+    content: "";
+    @apply flex-1 h-px bg-border;
+  }
+
+  /* ── Skeleton shimmer ── */
+  .skeleton {
+    @apply animate-pulse rounded-md bg-muted;
+  }
+
+  /* ── Page transition ── */
+  .animate-page-in {
+    animation: page-in 0.22s ease-out both;
   }
 }
 
+/* ─────────────────────────────────────────────────────────────
+   UTILITIES
+   ───────────────────────────────────────────────────────────── */
+
 @layer utilities {
-  /* Triage severity colors */
-  .triage-emergency {
-    @apply bg-red-50 border-red-200 text-red-700;
+
+  /* ── Text balance ── */
+  .text-balance { text-wrap: balance; }
+  .text-pretty  { text-wrap: pretty;  }
+
+  /* ── Truncate multi-line ── */
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
-  .triage-urgent {
-    @apply bg-orange-50 border-orange-200 text-orange-700;
+
+  /* ── Shadow utilities using CSS vars ── */
+  .shadow-card     { box-shadow: var(--shadow-card); }
+  .shadow-elevated { box-shadow: var(--shadow-lg);   }
+
+  /* ── Focus ring override for brand color ── */
+  .ring-brand {
+    --tw-ring-color: hsl(var(--primary));
   }
-  .triage-semiurgent {
-    @apply bg-yellow-50 border-yellow-200 text-yellow-700;
+
+  /* ── Gradient text utility ── */
+  .text-gradient-blue {
+    background: linear-gradient(135deg, hsl(221 83% 53%), hsl(214 100% 68%));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
-  .triage-nonurgent {
-    @apply bg-green-50 border-green-200 text-green-700;
-  }
-  .triage-selfcare {
-    @apply bg-blue-50 border-blue-200 text-blue-700;
-  }
+}
+
+/* ─────────────────────────────────────────────────────────────
+   KEYFRAMES
+   Restrained, purposeful motion
+   ───────────────────────────────────────────────────────────── */
+
+@keyframes page-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0);   }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0);   }
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.97); }
+  to   { opacity: 1; transform: scale(1);    }
+}
+
+@keyframes shimmer {
+  from { background-position: -200% center; }
+  to   { background-position:  200% center; }
 }

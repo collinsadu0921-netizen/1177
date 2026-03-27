@@ -3,42 +3,84 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const badgeVariants = cva(
-  "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+  // ── Base ─────────────────────────────────────────────────────────────────
+  "inline-flex items-center gap-1 rounded-full font-medium tabular-nums whitespace-nowrap",
   {
     variants: {
       variant: {
+        // ── Brand ──────────────────────────────────────────────────────────
         default:
-          "border-transparent bg-primary/10 text-primary hover:bg-primary/20",
+          "bg-primary-50 text-primary-700 ring-1 ring-primary-200",
+
+        // ── Neutral ────────────────────────────────────────────────────────
         secondary:
-          "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80",
+          "bg-secondary text-secondary-foreground ring-1 ring-border",
+
+        outline:
+          "bg-transparent text-foreground ring-1 ring-border",
+
+        // ── Semantic ───────────────────────────────────────────────────────
+        success:
+          "bg-green-50 text-green-700 ring-1 ring-green-200",
+        warning:
+          "bg-amber-50 text-amber-700 ring-1 ring-amber-200",
         destructive:
-          "border-transparent bg-destructive/10 text-destructive hover:bg-destructive/20",
-        outline: "border border-current text-foreground",
-        // Triage levels
-        emergency: "border-transparent bg-red-100 text-red-700",
-        urgent: "border-transparent bg-orange-100 text-orange-700",
-        semi_urgent: "border-transparent bg-yellow-100 text-yellow-700",
-        non_urgent: "border-transparent bg-green-100 text-green-700",
-        self_care: "border-transparent bg-blue-100 text-blue-700",
-        // Status
-        pending: "border-transparent bg-amber-100 text-amber-700",
-        reviewed: "border-transparent bg-emerald-100 text-emerald-700",
-        closed: "border-transparent bg-slate-100 text-slate-600",
+          "bg-red-50 text-red-700 ring-1 ring-red-200",
+
+        // ── Triage levels (clinical) ───────────────────────────────────────
+        emergency:
+          "bg-red-50 text-red-700 ring-1 ring-red-200",
+        urgent:
+          "bg-orange-50 text-orange-700 ring-1 ring-orange-200",
+        semi_urgent:
+          "bg-amber-50 text-amber-700 ring-1 ring-amber-200",
+        non_urgent:
+          "bg-green-50 text-green-700 ring-1 ring-green-200",
+        self_care:
+          "bg-blue-50 text-blue-700 ring-1 ring-blue-200",
+
+        // ── Encounter status ───────────────────────────────────────────────
+        pending:
+          "bg-amber-50 text-amber-700 ring-1 ring-amber-200",
+        reviewed:
+          "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200",
+        closed:
+          "bg-slate-100 text-slate-600 ring-1 ring-slate-200",
+        in_progress:
+          "bg-blue-50 text-blue-700 ring-1 ring-blue-200",
+      },
+
+      size: {
+        sm:      "px-2    py-0.5 text-[10px] leading-4",
+        default: "px-2.5 py-0.5 text-xs    leading-5",
+        md:      "px-3    py-1   text-sm    leading-5",
       },
     },
     defaultVariants: {
       variant: "default",
+      size: "default",
     },
   }
 );
 
 export interface BadgeProps
-  extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof badgeVariants> {}
+  extends React.HTMLAttributes<HTMLSpanElement>,
+    VariantProps<typeof badgeVariants> {
+  /** Optional leading dot indicator */
+  dot?: boolean;
+}
 
-function Badge({ className, variant, ...props }: BadgeProps) {
+function Badge({ className, variant, size, dot, children, ...props }: BadgeProps) {
   return (
-    <div className={cn(badgeVariants({ variant }), className)} {...props} />
+    <span className={cn(badgeVariants({ variant, size }), className)} {...props}>
+      {dot && (
+        <span
+          className="inline-block h-1.5 w-1.5 rounded-full bg-current opacity-70"
+          aria-hidden
+        />
+      )}
+      {children}
+    </span>
   );
 }
 

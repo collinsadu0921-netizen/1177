@@ -1,11 +1,22 @@
 import type { Metadata, Viewport } from "next";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 
+// ── Inter: loaded via next/font for zero-CLS, self-hosted subset ──
+const inter = Inter({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-sans",
+  // Load all weights we use: 400 body, 500 medium, 600 semibold, 700 bold
+  weight: ["400", "500", "600", "700"],
+  fallback: ["system-ui", "sans-serif"],
+});
+
 export const metadata: Metadata = {
   title: {
-    template: "%s | eHealth",
-    default: "eHealth — Your digital health companion",
+    template: "%s · eHealth",
+    default: "eHealth",
   },
   description:
     "Check your symptoms, get a triage assessment, and connect with a clinician — all in one place.",
@@ -18,7 +29,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0284C7",
+  themeColor: "#2563EB",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
@@ -31,12 +42,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning className={inter.variable}>
       <head />
       <body
         className={cn(
-          "min-h-screen bg-background font-sans antialiased",
-          "selection:bg-primary/20 selection:text-primary"
+          "min-h-screen bg-background text-foreground antialiased",
+          "font-sans"
         )}
       >
         {children}
