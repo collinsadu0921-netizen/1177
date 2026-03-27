@@ -1,10 +1,18 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Calendar, FileText, User } from "lucide-react";
+import {
+  AlertTriangle,
+  ArrowLeft,
+  Calendar,
+  FileText,
+  Pill,
+  User,
+} from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { TriageResultCard } from "@/components/encounter/triage-result-card";
 import { getEncounterById } from "@/domains/encounters/queries";
+import { getCategoryById } from "@/domains/symptoms/categories";
 import { formatDate } from "@/lib/utils";
 
 export const metadata = { title: "Visit detail" };
@@ -33,16 +41,38 @@ const DURATION_LABELS: Record<string, string> = {
   more_than_1_week: "> 1 week",
 };
 
+function statusBadgeVariant(status: string) {
+  if (status === "closed")         return "closed"    as const;
+  if (status === "reviewed")       return "reviewed"  as const;
+  if (status === "in_progress")    return "in_progress" as const;
+  return "pending" as const;
+}
+
 export default async function HistoryEncounterPage({ params }: PageProps) {
   const { encounterId } = await params;
   const result = await getEncounterById(encounterId);
-  if (!result.data) notFound();
 
-  const enc = result.data;
+  if (!result.data) notFound();
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  const enc = result.data!;
+
+  const ctx      = enc.intakeContext;
+  const category = ctx ? getCategoryById(ctx.categoryId) : undefined;
+
+  // Build danger sign labels from the category config
+  const dangerSignLabels =
+    ctx && ctx.dangerSigns.length > 0 && category
+      ? ctx.dangerSigns
+          .map((id) => category.dangerSigns.find((d) => d.id === id)?.label ?? id)
+          .filter(Boolean)
+      : [];
+
+  const hasConditions = ctx && ctx.conditions.filter((c) => c !== "none").length > 0;
 
   return (
     <div className="page-container py-6 flex flex-col gap-5 animate-page-in">
-      {/* Back */}
+
+      {/* Back link */}
       <Link
         href="/app/history"
         className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
@@ -61,10 +91,7 @@ export default async function HistoryEncounterPage({ params }: PageProps) {
             {formatDate(enc.createdAt)}
           </p>
         </div>
-        <Badge
-          variant={enc.status === "closed" ? "closed" : enc.status === "reviewed" ? "reviewed" : "pending"}
-          className="shrink-0"
-        >
+        <Badge variant={statusBadgeVariant(enc.status)} className="shrink-0">
           {STATUS_LABELS[enc.status]}
         </Badge>
       </div>
@@ -73,36 +100,98 @@ export default async function HistoryEncounterPage({ params }: PageProps) {
       {enc.triageOutcome && <TriageResultCard outcome={enc.triageOutcome} />}
 
       {/* Symptoms */}
-      <Card>
-        <CardContent className="p-5">
-          <h2 className="text-sm font-semibold mb-3 flex items-center gap-2 text-muted-foreground">
-            <FileText className="h-4 w-4" />
-            Reported Symptoms
-          </h2>
-          <div className="divide-y divide-border/60">
-            {enc.symptoms.map((s) => (
-              <div key={s.symptomId} className="py-2.5 flex items-center justify-between gap-3">
-                <span className="text-sm">{s.label}</span>
-                <div className="flex items-center gap-2 shrink-0">
-                  <Badge variant="secondary" size="sm">
-                    {SEVERITY_LABELS[s.severity]}
-                  </Badge>
-                  <span className="text-xs text-muted-foreground">
-                    {DURATION_LABELS[s.duration]}
-                  </span>
+      {enc.symptoms.length > 0 && (
+        <Card>
+          <CardContent className="p-5">
+            <h2 className="text-sm font-semibold mb-3 flex items-center gap-2 text-muted-foreground">
+              <FileText className="h-4 w-4" aria-hidden />
+              Reported Symptoms
+            </h2>
+            <div className="divide-y divide-border/60">
+              {enc.symptoms.map((s) => (
+                <div key={s.symptomId} className="py-2.5 flex items-center justify-between gap-3">
+                  <span className="text-sm">{s.label}</span>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <Badge variant="secondary" size="sm">
+                      {SEVERITY_LABELS[s.severity]}
+                    </Badge>
+                    <span className="text-xs text-muted-foreground">
+                      {DURATION_LABELS[s.duration]}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Danger signs */}
+      {dangerSignLabels.length > 0 && (
+        <Card className="border-red-200 bg-red-50">
+          <CardContent className="p-5">
+            <h2 className="text-sm font-semibold mb-3 flex items-center gap-2 text-red-700">
+              <AlertTriangle className="h-4 w-4" aria-hidden />
+              Warning signs reported
+            </h2>
+            <ul className="space-y-1.5">
+              {dangerSignLabels.map((label) => (
+                <li key={label} className="flex items-start gap-2 text-sm text-red-800">
+                  <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-red-400 shrink-0" />
+                  {label}
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Medication & conditions */}
+      {ctx && (ctx.takesMedication || hasConditions) && (
+        <Card>
+          <CardContent className="p-5 space-y-4">
+            <h2 className="text-sm font-semibold flex items-center gap-2 text-muted-foreground">
+              <Pill className="h-4 w-4" aria-hidden />
+              Medical context
+            </h2>
+
+            {ctx.takesMedication && (
+              <div>
+                <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium mb-1">
+                  Current medication
+                </p>
+                <p className="text-sm">
+                  {ctx.medication ?? "Patient indicated they take medication"}
+                </p>
+              </div>
+            )}
+
+            {hasConditions && (
+              <div>
+                <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium mb-2">
+                  Known conditions
+                </p>
+                <div className="flex flex-wrap gap-1.5">
+                  {ctx.conditions
+                    .filter((c) => c !== "none")
+                    .map((c) => (
+                      <Badge key={c} variant="secondary" size="sm">
+                        {c.replace(/_/g, " ")}
+                      </Badge>
+                    ))}
                 </div>
               </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Clinician notes */}
       {enc.clinicianNotes && (
         <Card>
           <CardContent className="p-5">
             <h2 className="text-sm font-semibold mb-2 flex items-center gap-2 text-muted-foreground">
-              <User className="h-4 w-4" />
+              <User className="h-4 w-4" aria-hidden />
               Clinician Notes
             </h2>
             <p className="text-sm leading-relaxed">{enc.clinicianNotes}</p>
@@ -110,15 +199,15 @@ export default async function HistoryEncounterPage({ params }: PageProps) {
         </Card>
       )}
 
-      {/* Meta */}
-      <div className="space-y-1 text-xs text-muted-foreground">
+      {/* Timestamps */}
+      <div className="space-y-1 text-xs text-muted-foreground pb-6">
         <div className="flex items-center gap-1.5">
-          <Calendar className="h-3.5 w-3.5" />
+          <Calendar className="h-3.5 w-3.5" aria-hidden />
           Submitted {formatDate(enc.createdAt)}
         </div>
         {enc.closedAt && (
           <div className="flex items-center gap-1.5">
-            <Calendar className="h-3.5 w-3.5" />
+            <Calendar className="h-3.5 w-3.5" aria-hidden />
             Closed {formatDate(enc.closedAt)}
           </div>
         )}

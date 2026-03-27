@@ -1,19 +1,20 @@
 import { createClient } from "@/lib/supabase/server";
-import type { Encounter, QueueItem, ApiResult } from "@/lib/types";
+import type { Encounter, IntakeContext, QueueItem, ApiResult } from "@/lib/types";
 
 function rowToEncounter(data: Record<string, unknown>): Encounter {
   return {
-    id: data.id as string,
-    patientId: data.patient_id as string,
+    id:             data.id as string,
+    patientId:      data.patient_id as string,
     chiefComplaint: data.chief_complaint as string,
-    symptoms: (data.symptoms as Encounter["symptoms"]) ?? [],
-    triageOutcome: data.triage_outcome as Encounter["triageOutcome"],
-    status: data.status as Encounter["status"],
-    clinicianId: data.clinician_id as string | null,
+    symptoms:       (data.symptoms as Encounter["symptoms"]) ?? [],
+    triageOutcome:  data.triage_outcome as Encounter["triageOutcome"],
+    intakeContext:  (data.intake_context as IntakeContext) ?? null,
+    status:         data.status as Encounter["status"],
+    clinicianId:    data.clinician_id as string | null,
     clinicianNotes: data.clinician_notes as string | null,
-    closedAt: data.closed_at as string | null,
-    createdAt: data.created_at as string,
-    updatedAt: data.updated_at as string,
+    closedAt:       data.closed_at as string | null,
+    createdAt:      data.created_at as string,
+    updatedAt:      data.updated_at as string,
   };
 }
 

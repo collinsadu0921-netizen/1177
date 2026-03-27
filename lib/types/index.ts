@@ -42,6 +42,7 @@ export interface Encounter {
   chiefComplaint: string;
   symptoms: SymptomEntry[];
   triageOutcome: TriageOutcome | null;
+  intakeContext: IntakeContext | null;
   status: EncounterStatus;
   clinicianId: string | null;
   clinicianNotes: string | null;
@@ -91,9 +92,18 @@ export type SymptomCategory =
 // Triage
 export interface TriageOutcome {
   level: TriageLevel;
+  /** Short display label, e.g. "Urgent" */
   label: string;
+  /** Headline on the result screen, e.g. "Visit an urgent care clinic today" */
   recommendation: string;
+  /** One-sentence plain-language rationale */
+  rationale: string;
+  /** When to seek care, e.g. "Within 2–4 hours" */
   seekCareWithin: string;
+  /** Action key for the primary CTA on the result screen */
+  nextAction: "home" | "pharmacy" | "nurse" | "doctor" | "clinic" | "emergency";
+  /** Button label for the primary CTA */
+  nextActionLabel: string;
 }
 
 export type TriageLevel =
@@ -102,6 +112,20 @@ export type TriageLevel =
   | "semi_urgent"
   | "non_urgent"
   | "self_care";
+
+// Structured context captured during guided intake
+export interface IntakeContext {
+  /** Selected category ID (fever, headache, cough, stomach, injury, skin, other) */
+  categoryId: string;
+  /** Selected danger sign IDs */
+  dangerSigns: string[];
+  /** Whether the patient is taking medication */
+  takesMedication: boolean;
+  /** Free-text medication description (if takesMedication is true) */
+  medication: string | null;
+  /** Selected condition IDs */
+  conditions: string[];
+}
 
 // Clinician
 export interface Clinician {
