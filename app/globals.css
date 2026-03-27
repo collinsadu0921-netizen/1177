@@ -1,0 +1,96 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 210 20% 98%;
+    --foreground: 215 25% 12%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 215 25% 12%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 215 25% 12%;
+
+    /* Primary: calm teal-blue */
+    --primary: 199 89% 40%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 210 16% 93%;
+    --secondary-foreground: 215 20% 30%;
+
+    --muted: 210 16% 93%;
+    --muted-foreground: 215 14% 50%;
+
+    --accent: 199 60% 92%;
+    --accent-foreground: 199 89% 30%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 214 20% 88%;
+    --input: 214 20% 88%;
+    --ring: 199 89% 40%;
+
+    --radius: 0.75rem;
+
+    --font-sans: "Inter", "system-ui", sans-serif;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Mobile-first safe area handling */
+  .safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+@layer components {
+  /* Page container — max-width centered for mobile-first */
+  .page-container {
+    @apply mx-auto w-full max-w-md px-4;
+  }
+
+  /* Screen-height full page with bottom nav clearance */
+  .screen {
+    @apply min-h-screen pb-24;
+  }
+
+  /* Card hover lift */
+  .card-hover {
+    @apply transition-shadow duration-200 hover:shadow-md;
+  }
+}
+
+@layer utilities {
+  /* Triage severity colors */
+  .triage-emergency {
+    @apply bg-red-50 border-red-200 text-red-700;
+  }
+  .triage-urgent {
+    @apply bg-orange-50 border-orange-200 text-orange-700;
+  }
+  .triage-semiurgent {
+    @apply bg-yellow-50 border-yellow-200 text-yellow-700;
+  }
+  .triage-nonurgent {
+    @apply bg-green-50 border-green-200 text-green-700;
+  }
+  .triage-selfcare {
+    @apply bg-blue-50 border-blue-200 text-blue-700;
+  }
+}
