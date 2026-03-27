@@ -1,5 +1,19 @@
 import { createClient } from "@/lib/supabase/server";
-import type { Encounter, IntakeContext, QueueItem, ApiResult } from "@/lib/types";
+import type { Encounter, EncounterStatus, IntakeContext, QueueItem, TriageLevel, ApiResult } from "@/lib/types";
+
+// ── Admin encounter list type (lean — no JSONB symptoms payload) ───────────
+
+export interface AdminEncounterItem {
+  id:            string;
+  patientId:     string;
+  patientName:   string;
+  chiefComplaint: string;
+  triageLevel:   TriageLevel | null;
+  triageLabel:   string | null;
+  status:        EncounterStatus;
+  clinicianName: string | null;
+  createdAt:     string;
+}
 
 function rowToEncounter(data: Record<string, unknown>): Encounter {
   return {
@@ -124,4 +138,36 @@ export async function getClinicianQueueFull(): Promise<ApiResult<QueueItem[]>> {
     data: (data ?? []).map((row) => rowToQueueItem(row as Record<string, unknown>)),
     error: null,
   };
+}
+
+/** Admin encounter list — all encounters with patient + clinician names */
+export async function getEncountersForAdmin(): Promise<ApiResult<AdminEncounterItem[]>> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("encounters")
+    .select("id, patient_id, chief_complaint, triage_outcome, status, clinician_id, created_at, patients(full_name), clinicians(full_name)")
+    .order("created_at", { ascending: false });
+
+  if (error) return { data: null, error: error.message };
+
+  const items: AdminEncounterItem[] = (data ?? []).map((row) => {
+    const r         = row as Record<string, unknown>;
+    const patient   = r.patients   as { full_name: string } | null;
+    const clinician = r.clinicians as { full_name: string } | null;
+    const triage    = r.triage_outcome as { level: string; label: string } | null;
+    return {
+      id:             r.id as string,
+      patientId:      r.patient_id as string,
+      patientName:    patient?.full_name ?? "Unknown",
+      chiefComplaint: r.chief_complaint as string,
+      triageLevel:    (triage?.level ?? null) as TriageLevel | null,
+      triageLabel:    triage?.label ?? null,
+      status:         r.status as EncounterStatus,
+      clinicianName:  clinician?.full_name ?? null,
+      createdAt:      r.created_at as string,
+    };
+  });
+
+  return { data: items, error: null };
 }
