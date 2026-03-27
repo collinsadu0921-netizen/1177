@@ -1,12 +1,14 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-import type { Patient, BiologicalSex, ApiResult } from "@/lib/types";
+import type { Patient, BiologicalSex, EmergencyContact, ApiResult } from "@/lib/types";
 
 export interface UpsertPatientInput {
   fullName: string;
   dateOfBirth: string;
   sex: BiologicalSex;
+  location?: string;
+  emergencyContact?: EmergencyContact;
 }
 
 export async function upsertPatient(
@@ -24,12 +26,14 @@ export async function upsertPatient(
     .from("patients")
     .upsert(
       {
-        user_id: user.id,
-        full_name: input.fullName,
-        date_of_birth: input.dateOfBirth,
-        sex: input.sex,
-        phone: user.phone ?? "",
-        updated_at: new Date().toISOString(),
+        user_id:           user.id,
+        full_name:         input.fullName,
+        date_of_birth:     input.dateOfBirth,
+        sex:               input.sex,
+        phone:             user.phone ?? "",
+        location:          input.location ?? null,
+        emergency_contact: input.emergencyContact ?? null,
+        updated_at:        new Date().toISOString(),
       },
       { onConflict: "user_id" }
     )
@@ -40,14 +44,16 @@ export async function upsertPatient(
 
   return {
     data: {
-      id: data.id,
-      userId: data.user_id,
-      fullName: data.full_name,
-      dateOfBirth: data.date_of_birth,
-      sex: data.sex,
-      phone: data.phone,
-      createdAt: data.created_at,
-      updatedAt: data.updated_at,
+      id:               data.id,
+      userId:           data.user_id,
+      fullName:         data.full_name,
+      dateOfBirth:      data.date_of_birth,
+      sex:              data.sex,
+      phone:            data.phone,
+      location:         data.location ?? null,
+      emergencyContact: data.emergency_contact ?? null,
+      createdAt:        data.created_at,
+      updatedAt:        data.updated_at,
     },
     error: null,
   };

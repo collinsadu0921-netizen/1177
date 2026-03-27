@@ -46,6 +46,30 @@ export async function signInWithPassword(input: {
   return { data: null, error: null };
 }
 
+/**
+ * Called after OTP verification succeeds.
+ * Returns the path the client should navigate to:
+ *   - "/onboarding" if the patient has no profile record yet
+ *   - "/app" if the profile is already complete
+ */
+export async function getPostAuthRedirect(): Promise<string> {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return "/login";
+
+  const { data } = await supabase
+    .from("patients")
+    .select("id")
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  return data ? "/app" : "/onboarding";
+}
+
 export async function signOut(): Promise<void> {
   const supabase = await createClient();
   await supabase.auth.signOut();

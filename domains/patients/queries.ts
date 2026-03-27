@@ -3,14 +3,16 @@ import type { Patient, ApiResult } from "@/lib/types";
 
 function rowToPatient(data: Record<string, unknown>): Patient {
   return {
-    id: data.id as string,
-    userId: data.user_id as string,
-    fullName: data.full_name as string,
-    dateOfBirth: data.date_of_birth as string,
-    sex: data.sex as Patient["sex"],
-    phone: data.phone as string,
-    createdAt: data.created_at as string,
-    updatedAt: data.updated_at as string,
+    id:               data.id as string,
+    userId:           data.user_id as string,
+    fullName:         data.full_name as string,
+    dateOfBirth:      data.date_of_birth as string,
+    sex:              data.sex as Patient["sex"],
+    phone:            data.phone as string,
+    location:         (data.location as string | null) ?? null,
+    emergencyContact: (data.emergency_contact as Patient["emergencyContact"]) ?? null,
+    createdAt:        data.created_at as string,
+    updatedAt:        data.updated_at as string,
   };
 }
 
@@ -59,18 +61,5 @@ export async function getPatientByUserId(
   if (error) return { data: null, error: error.message };
 
   if (!data) return { data: null, error: null };
-
-  return {
-    data: {
-      id: data.id,
-      userId: data.user_id,
-      fullName: data.full_name,
-      dateOfBirth: data.date_of_birth,
-      sex: data.sex,
-      phone: data.phone,
-      createdAt: data.created_at,
-      updatedAt: data.updated_at,
-    },
-    error: null,
-  };
+  return { data: rowToPatient(data as Record<string, unknown>), error: null };
 }

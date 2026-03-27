@@ -20,11 +20,19 @@ export interface Patient {
   dateOfBirth: string; // ISO date string
   sex: BiologicalSex;
   phone: string;
+  location: string | null;
+  emergencyContact: EmergencyContact | null;
   createdAt: string;
   updatedAt: string;
 }
 
 export type BiologicalSex = "male" | "female" | "other" | "prefer_not_to_say";
+
+export interface EmergencyContact {
+  name: string;
+  phone: string;
+  relationship: string;
+}
 
 // Encounter
 export interface Encounter {
