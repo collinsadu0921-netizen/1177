@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, User, Phone, Calendar, Activity } from "lucide-react";
+import { Activity, ArrowLeft, Calendar, MapPin, Phone, User } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -15,11 +15,25 @@ interface PageProps {
 }
 
 const SEX_LABELS: Record<string, string> = {
-  male:             "Male",
-  female:           "Female",
-  other:            "Other",
-  prefer_not_to_say:"Prefer not to say",
+  male:              "Male",
+  female:            "Female",
+  other:             "Other",
+  prefer_not_to_say: "Prefer not to say",
 };
+
+const STATUS_LABELS: Record<string, string> = {
+  in_progress:    "In Progress",
+  pending_review: "Pending",
+  reviewed:       "In Progress",
+  closed:         "Closed",
+};
+
+function statusBadgeVariant(status: string) {
+  if (status === "closed")      return "closed"      as const;
+  if (status === "reviewed")    return "reviewed"    as const;
+  if (status === "in_progress") return "in_progress" as const;
+  return "pending" as const;
+}
 
 export default async function PatientDetailPage({ params }: PageProps) {
   const { patientId } = await params;
@@ -30,8 +44,8 @@ export default async function PatientDetailPage({ params }: PageProps) {
   ]);
 
   if (!patientResult.data) notFound();
-
-  const patient = patientResult.data;
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  const patient    = patientResult.data!;
   const encounters = encountersResult.data ?? [];
 
   const dob = new Date(patient.dateOfBirth);
@@ -41,6 +55,7 @@ export default async function PatientDetailPage({ params }: PageProps) {
 
   return (
     <div className="mx-auto w-full max-w-2xl px-4 py-6 flex flex-col gap-5">
+
       {/* Back */}
       <Link
         href="/clinician/patients"
@@ -50,31 +65,60 @@ export default async function PatientDetailPage({ params }: PageProps) {
         Patients
       </Link>
 
-      {/* Patient card */}
+      {/* Patient header card */}
       <Card>
-        <CardContent className="p-5">
+        <CardContent className="p-5 flex flex-col gap-4">
           <div className="flex items-center gap-4">
             <Avatar size="lg">
               <AvatarFallback>{initials(patient.fullName)}</AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
               <h1 className="text-xl font-bold truncate">{patient.fullName}</h1>
-              <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1.5">
-                <span className="text-sm text-muted-foreground flex items-center gap-1">
-                  <User className="h-3.5 w-3.5" />
-                  {age} yrs · {SEX_LABELS[patient.sex] ?? patient.sex}
-                </span>
-                <span className="text-sm text-muted-foreground flex items-center gap-1">
-                  <Phone className="h-3.5 w-3.5" />
-                  {patient.phone}
-                </span>
-                <span className="text-sm text-muted-foreground flex items-center gap-1">
-                  <Calendar className="h-3.5 w-3.5" />
-                  DOB {formatDate(patient.dateOfBirth)}
-                </span>
-              </div>
+              <p className="text-sm text-muted-foreground mt-0.5">
+                {age} yrs · {SEX_LABELS[patient.sex] ?? patient.sex}
+              </p>
             </div>
           </div>
+
+          {/* Contact & demographics */}
+          <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Phone className="h-3.5 w-3.5 shrink-0" />
+              {patient.phone}
+            </div>
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Calendar className="h-3.5 w-3.5 shrink-0" />
+              DOB {formatDate(patient.dateOfBirth)}
+            </div>
+            {patient.location && (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <MapPin className="h-3.5 w-3.5 shrink-0" />
+                {patient.location}
+              </div>
+            )}
+          </div>
+
+          {/* Emergency contact */}
+          {patient.emergencyContact && (
+            <div className="pt-3 border-t border-border/60">
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">
+                Emergency contact
+              </p>
+              <div className="flex flex-col gap-1 text-sm">
+                <div className="flex items-center gap-2">
+                  <User className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                  <span className="font-medium">{patient.emergencyContact.name}</span>
+                  <span className="text-muted-foreground text-xs">
+                    · {patient.emergencyContact.relationship}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Phone className="h-3.5 w-3.5 shrink-0" />
+                  {patient.emergencyContact.phone}
+                </div>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -101,27 +145,25 @@ export default async function PatientDetailPage({ params }: PageProps) {
                 <Card interactive>
                   <CardContent className="p-4 flex items-start justify-between gap-3">
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium text-sm leading-snug">
+                      <p className="font-medium text-sm leading-snug line-clamp-1">
                         {enc.chiefComplaint}
                       </p>
                       <p className="text-xs text-muted-foreground mt-0.5">
                         {formatDate(enc.createdAt)}
                       </p>
                     </div>
-                    <div className="flex items-center gap-2 shrink-0">
+                    <div className="flex items-center gap-1.5 shrink-0 flex-wrap justify-end">
                       {enc.triageOutcome && (
                         <Badge
-                          variant={triageBadgeVariant(enc.triageOutcome.level as never)}
+                          variant={triageBadgeVariant(enc.triageOutcome.level)}
                           size="sm"
+                          dot
                         >
                           {enc.triageOutcome.label}
                         </Badge>
                       )}
-                      <Badge
-                        variant={enc.status === "closed" ? "closed" : "pending"}
-                        size="sm"
-                      >
-                        {enc.status.replace("_", " ")}
+                      <Badge variant={statusBadgeVariant(enc.status)} size="sm">
+                        {STATUS_LABELS[enc.status]}
                       </Badge>
                     </div>
                   </CardContent>

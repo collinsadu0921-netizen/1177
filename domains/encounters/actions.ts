@@ -15,6 +15,9 @@ function rowToEncounter(data: Record<string, unknown>): Encounter {
     status:         data.status as Encounter["status"],
     clinicianId:    data.clinician_id as string | null,
     clinicianNotes: data.clinician_notes as string | null,
+    diagnosis:      data.diagnosis as string | null,
+    prescription:   data.prescription as string | null,
+    referral:       data.referral as string | null,
     closedAt:       data.closed_at as string | null,
     createdAt:      data.created_at as string,
     updatedAt:      data.updated_at as string,
@@ -29,7 +32,6 @@ export async function createEncounter(
 ): Promise<ApiResult<Encounter>> {
   const supabase = await createClient();
 
-  // Pass danger signs (if any) to the triage engine
   const dangerSigns = intakeContext?.dangerSigns ?? [];
   const triageOutcome = runTriage(symptoms, dangerSigns);
 
@@ -44,6 +46,9 @@ export async function createEncounter(
       status:          "pending_review",
       clinician_id:    null,
       clinician_notes: null,
+      diagnosis:       null,
+      prescription:    null,
+      referral:        null,
       closed_at:       null,
     })
     .select()
@@ -54,10 +59,66 @@ export async function createEncounter(
   return { data: rowToEncounter(data as Record<string, unknown>), error: null };
 }
 
+// ── Clinical documentation fields shared across draft / review / close ─────
+
+export interface ClinicalFields {
+  clinicianNotes: string;
+  diagnosis: string;
+  prescription: string;
+  referral: string;
+}
+
+export async function saveDraftEncounter(
+  encounterId: string,
+  clinicianId: string,
+  fields: ClinicalFields
+): Promise<ApiResult<null>> {
+  const supabase = await createClient();
+
+  const { error } = await supabase
+    .from("encounters")
+    .update({
+      clinician_id:    clinicianId || null,
+      clinician_notes: fields.clinicianNotes || null,
+      diagnosis:       fields.diagnosis || null,
+      prescription:    fields.prescription || null,
+      referral:        fields.referral || null,
+      updated_at:      new Date().toISOString(),
+    })
+    .eq("id", encounterId);
+
+  if (error) return { data: null, error: error.message };
+  return { data: null, error: null };
+}
+
+export async function markEncounterReviewed(
+  encounterId: string,
+  clinicianId: string,
+  fields: ClinicalFields
+): Promise<ApiResult<null>> {
+  const supabase = await createClient();
+
+  const { error } = await supabase
+    .from("encounters")
+    .update({
+      status:          "reviewed",
+      clinician_id:    clinicianId || null,
+      clinician_notes: fields.clinicianNotes || null,
+      diagnosis:       fields.diagnosis || null,
+      prescription:    fields.prescription || null,
+      referral:        fields.referral || null,
+      updated_at:      new Date().toISOString(),
+    })
+    .eq("id", encounterId);
+
+  if (error) return { data: null, error: error.message };
+  return { data: null, error: null };
+}
+
 export async function closeEncounter(
   encounterId: string,
   clinicianId: string,
-  notes: string
+  fields: ClinicalFields
 ): Promise<ApiResult<null>> {
   const supabase = await createClient();
 
@@ -66,7 +127,10 @@ export async function closeEncounter(
     .update({
       status:          "closed",
       clinician_id:    clinicianId || null,
-      clinician_notes: notes,
+      clinician_notes: fields.clinicianNotes || null,
+      diagnosis:       fields.diagnosis || null,
+      prescription:    fields.prescription || null,
+      referral:        fields.referral || null,
       closed_at:       new Date().toISOString(),
       updated_at:      new Date().toISOString(),
     })

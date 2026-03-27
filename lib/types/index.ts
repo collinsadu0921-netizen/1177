@@ -46,6 +46,9 @@ export interface Encounter {
   status: EncounterStatus;
   clinicianId: string | null;
   clinicianNotes: string | null;
+  diagnosis: string | null;
+  prescription: string | null;
+  referral: string | null;
   closedAt: string | null;
   createdAt: string;
   updatedAt: string;
