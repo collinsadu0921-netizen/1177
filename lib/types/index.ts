@@ -44,6 +44,7 @@ export interface Encounter {
   triageOutcome: TriageOutcome | null;
   intakeContext: IntakeContext | null;
   status: EncounterStatus;
+  channel: EncounterChannel;
   clinicianId: string | null;
   clinicianNotes: string | null;
   diagnosis: string | null;
@@ -59,6 +60,8 @@ export type EncounterStatus =
   | "pending_review"
   | "reviewed"
   | "closed";
+
+export type EncounterChannel = "web" | "mobile" | "in_person" | "phone";
 
 // Symptoms
 export interface SymptomEntry {
@@ -137,6 +140,19 @@ export interface Clinician {
   fullName: string;
   specialty: string | null;
   createdAt: string;
+}
+
+// Clinician note (normalized documentation history)
+export interface ClinicianNote {
+  id: string;
+  encounterId: string;
+  clinicianId: string | null;
+  notes: string | null;
+  diagnosis: string | null;
+  prescription: string | null;
+  referral: string | null;
+  createdAt: string;
+  updatedAt: string;
 }
 
 // Admin
