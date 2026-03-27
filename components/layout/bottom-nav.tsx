@@ -6,17 +6,11 @@ import { Home, Clock, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
-  { href: "/home",    label: "Home",    icon: Home },
-  { href: "/history", label: "History", icon: Clock },
-  { href: "/profile", label: "Profile", icon: User },
+  { href: "/app",         label: "Home",    icon: Home  },
+  { href: "/app/history", label: "History", icon: Clock },
+  { href: "/app/profile", label: "Profile", icon: User  },
 ];
 
-/**
- * BottomNav — fixed mobile navigation bar.
- *
- * Active indicator: a short bar above the icon + bold text + primary color.
- * Inactive: muted gray. No background fill on active to keep it clean.
- */
 export function BottomNav() {
   const pathname = usePathname();
 
@@ -30,44 +24,32 @@ export function BottomNav() {
     >
       <div className="page-container flex items-stretch h-16">
         {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
-          const isActive = pathname === href || pathname.startsWith(href + "/");
+          // /app should only be active on exact /app, not on /app/history or /app/profile
+          const isActive =
+            href === "/app"
+              ? pathname === "/app"
+              : pathname === href || pathname.startsWith(href + "/");
 
           return (
             <Link
               key={href}
               href={href}
               className={cn(
-                "flex flex-1 flex-col items-center justify-center gap-1 pt-1",
-                "relative transition-colors duration-150",
+                "flex flex-1 flex-col items-center justify-center gap-1 pt-1 relative",
+                "transition-colors duration-150",
                 "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset",
-                isActive
-                  ? "text-primary"
-                  : "text-muted-foreground hover:text-foreground"
+                isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"
               )}
             >
-              {/* Active bar indicator at top */}
               <span
                 className={cn(
-                  "absolute top-0 left-1/2 -translate-x-1/2",
-                  "h-0.5 rounded-full transition-all duration-200",
-                  isActive
-                    ? "w-6 bg-primary"
-                    : "w-0 bg-transparent"
+                  "absolute top-0 left-1/2 -translate-x-1/2 h-0.5 rounded-full transition-all duration-200",
+                  isActive ? "w-6 bg-primary" : "w-0 bg-transparent"
                 )}
                 aria-hidden
               />
-
-              <Icon
-                className="h-5 w-5"
-                strokeWidth={isActive ? 2.5 : 1.75}
-                aria-hidden
-              />
-              <span
-                className={cn(
-                  "text-[10px] font-medium",
-                  isActive ? "font-semibold" : ""
-                )}
-              >
+              <Icon className="h-5 w-5" strokeWidth={isActive ? 2.5 : 1.75} aria-hidden />
+              <span className={cn("text-[10px]", isActive ? "font-semibold" : "font-medium")}>
                 {label}
               </span>
             </Link>

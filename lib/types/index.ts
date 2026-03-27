@@ -104,6 +104,23 @@ export interface Clinician {
   createdAt: string;
 }
 
+// Admin
+export interface Admin {
+  id: string;
+  userId: string;
+  fullName: string;
+  email: string;
+  createdAt: string;
+}
+
+// Session context (used in layouts and server components)
+export interface SessionContext {
+  userId: string;
+  role: UserRole;
+  /** Resolved display name from the correct domain table */
+  displayName: string | null;
+}
+
 // Queue item (encounter enriched for clinician view)
 export interface QueueItem {
   encounterId: string;

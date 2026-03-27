@@ -31,6 +31,21 @@ export async function verifyOtp(
   return { data: null, error: null };
 }
 
+export async function signInWithPassword(input: {
+  email: string;
+  password: string;
+}): Promise<ApiResult<null>> {
+  const supabase = await createClient();
+
+  const { error } = await supabase.auth.signInWithPassword({
+    email: input.email,
+    password: input.password,
+  });
+
+  if (error) return { data: null, error: error.message };
+  return { data: null, error: null };
+}
+
 export async function signOut(): Promise<void> {
   const supabase = await createClient();
   await supabase.auth.signOut();

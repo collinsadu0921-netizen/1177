@@ -41,7 +41,7 @@ export function QueueItemRow({ item }: QueueItemRowProps) {
   const avatarClass = TRIAGE_AVATAR_BG[item.triageLevel] ?? "bg-muted text-muted-foreground";
 
   return (
-    <Link href={`/clinician/encounter/${item.encounterId}`} className="block">
+    <Link href={`/clinician/encounters/${item.encounterId}`} className="block">
       <Card
         interactive
         className={cn(

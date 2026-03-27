@@ -54,6 +54,22 @@ export async function getEncounterById(
   return { data: encounter, error: null };
 }
 
+export async function getAllEncounters(): Promise<ApiResult<Encounter[]>> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("encounters")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) return { data: null, error: error.message };
+
+  return {
+    data: (data ?? []).map((row) => rowToEncounter(row as Record<string, unknown>)),
+    error: null,
+  };
+}
+
 export async function getClinicianQueue(): Promise<ApiResult<QueueItem[]>> {
   const supabase = await createClient();
 
