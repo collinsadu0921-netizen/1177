@@ -6,6 +6,7 @@ import { ArrowRight, Check, AlertTriangle, CheckCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { StepHeader } from "@/components/ui/step-header";
+import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { SYMPTOMS } from "@/domains/symptoms/data";
 import { CATEGORIES, CONDITIONS } from "@/domains/symptoms/categories";
@@ -277,7 +278,7 @@ export default function CheckPage() {
                 type="button"
                 onClick={() => { setCategory(cat); setError(null); }}
                 className={cn(
-                  "flex flex-col items-start gap-2 rounded-2xl border p-4",
+                  "relative flex flex-col items-start gap-2 rounded-2xl border p-4",
                   "text-left transition-all duration-100 active:scale-[0.97]",
                   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                   category?.id === cat.id
@@ -307,7 +308,7 @@ export default function CheckPage() {
               type="button"
               onClick={() => { setCategory(CATEGORIES[6]); setError(null); }}
               className={cn(
-                "flex items-center gap-3 rounded-2xl border p-4",
+                "relative flex items-center gap-3 rounded-2xl border p-4",
                 "text-left transition-all duration-100 active:scale-[0.99]",
                 "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                 category?.id === CATEGORIES[6].id
@@ -451,7 +452,12 @@ export default function CheckPage() {
 
         <div className="sticky bottom-0 bg-background/95 backdrop-blur-md border-t border-border/60 px-4 py-4 safe-bottom">
           <div className="max-w-md mx-auto">
-            <Button size="xl" onClick={handleNext} className="w-full">
+            <Button
+              size="xl"
+              onClick={handleNext}
+              disabled={selectedSymptomIds.size === 0 || !duration || !severity}
+              className="w-full"
+            >
               Continue <ArrowRight className="h-5 w-5" />
             </Button>
           </div>
@@ -503,17 +509,11 @@ export default function CheckPage() {
             </div>
 
             {takesMedication && (
-              <textarea
+              <Textarea
                 rows={2}
                 placeholder="e.g. Paracetamol 500mg, Metformin 850mg…"
                 value={medicationText}
                 onChange={(e) => { setMedicationText(e.target.value); setError(null); }}
-                className={cn(
-                  "w-full rounded-xl border border-input bg-card px-4 py-3",
-                  "text-sm placeholder:text-muted-foreground/60 resize-none",
-                  "focus-visible:outline-none focus-visible:border-primary/60 focus-visible:shadow-focus-ring",
-                  "transition-all duration-150"
-                )}
               />
             )}
           </div>

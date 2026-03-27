@@ -23,10 +23,10 @@ const TRIAGE_ORDER: TriageLevel[] = [
 type TabKey = "active" | "pending" | "reviewed" | "closed";
 
 const TABS: { key: TabKey; label: string }[] = [
-  { key: "active",   label: "Active"      },
-  { key: "pending",  label: "Pending"     },
-  { key: "reviewed", label: "In Progress" },
-  { key: "closed",   label: "Closed"      },
+  { key: "active",   label: "Active"   },
+  { key: "pending",  label: "Pending"  },
+  { key: "reviewed", label: "Reviewed" },
+  { key: "closed",   label: "Closed"   },
 ];
 
 function sortByUrgency(items: QueueItem[]): QueueItem[] {
@@ -72,7 +72,11 @@ export default async function QueuePage({ searchParams }: PageProps) {
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Patient Queue</h1>
         <p className="text-sm text-muted-foreground mt-0.5">
-          {counts.active} active case{counts.active !== 1 ? "s" : ""} awaiting review
+          {counts.pending > 0
+            ? `${counts.pending} pending review${counts.reviewed > 0 ? ` · ${counts.reviewed} reviewed` : ""}`
+            : counts.active > 0
+            ? `${counts.reviewed} reviewed · no new cases`
+            : "Queue is clear"}
         </p>
       </div>
 

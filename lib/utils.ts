@@ -45,3 +45,11 @@ export function initials(name: string): string {
     .toUpperCase()
     .slice(0, 2);
 }
+
+/** Convert a snake_case condition id to Title Case for display. */
+export function formatCondition(id: string): string {
+  return id
+    .split("_")
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
+}

@@ -6,7 +6,7 @@ import {
   CheckCircle2,
   Clock,
   FileText,
-  Home,
+  History,
   Info,
   ShieldAlert,
 } from "lucide-react";
@@ -157,7 +157,7 @@ export default async function TriageOutcomePage({ params }: PageProps) {
         </Button>
         <Button asChild variant="ghost" size="lg" className="w-full">
           <Link href="/app/history">
-            <Home className="h-4 w-4 mr-2" aria-hidden />
+            <History className="h-4 w-4 mr-2" aria-hidden />
             View visit history
           </Link>
         </Button>

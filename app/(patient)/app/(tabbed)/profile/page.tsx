@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 import { CheckCircle, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { InputField } from "@/components/ui/input-field";
@@ -27,6 +28,24 @@ export default function ProfilePage() {
   const [saved, setSaved]           = useState(false);
   const [isPending, startTransition] = useTransition();
   const [isSigningOut, startSignOut] = useTransition();
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!user) return;
+      supabase
+        .from("patients")
+        .select("full_name, date_of_birth, sex")
+        .eq("user_id", user.id)
+        .maybeSingle()
+        .then(({ data }) => {
+          if (!data) return;
+          if (data.full_name)    setFullName(data.full_name as string);
+          if (data.date_of_birth) setDateOfBirth(data.date_of_birth as string);
+          if (data.sex)          setSex(data.sex as BiologicalSex);
+        });
+    });
+  }, []);
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();

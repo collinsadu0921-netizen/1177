@@ -18,7 +18,7 @@ import { EncounterActionPanel } from "@/components/clinician/encounter-action-pa
 import { getEncounterById } from "@/domains/encounters/queries";
 import { getPatientById } from "@/domains/patients/queries";
 import { getCategoryById } from "@/domains/symptoms/categories";
-import { formatDate, formatRelativeTime, initials } from "@/lib/utils";
+import { formatDate, formatRelativeTime, initials, formatCondition } from "@/lib/utils";
 
 export const metadata = { title: "Encounter Review" };
 
@@ -29,7 +29,7 @@ interface PageProps {
 const STATUS_LABELS = {
   in_progress:    "In Progress",
   pending_review: "Pending Review",
-  reviewed:       "In Progress",
+  reviewed:       "Reviewed",
   closed:         "Closed",
 } as const;
 
@@ -206,7 +206,7 @@ export default async function EncounterReviewPage({ params }: PageProps) {
                         .filter((c) => c !== "none")
                         .map((c) => (
                           <Badge key={c} variant="secondary" size="sm">
-                            {c.replace(/_/g, " ")}
+                            {formatCondition(c)}
                           </Badge>
                         ))}
                     </div>

@@ -13,7 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { TriageResultCard } from "@/components/encounter/triage-result-card";
 import { getEncounterById } from "@/domains/encounters/queries";
 import { getCategoryById } from "@/domains/symptoms/categories";
-import { formatDate } from "@/lib/utils";
+import { formatDate, formatCondition } from "@/lib/utils";
 
 export const metadata = { title: "Visit detail" };
 
@@ -176,7 +176,7 @@ export default async function HistoryEncounterPage({ params }: PageProps) {
                     .filter((c) => c !== "none")
                     .map((c) => (
                       <Badge key={c} variant="secondary" size="sm">
-                        {c.replace(/_/g, " ")}
+                        {formatCondition(c)}
                       </Badge>
                     ))}
                 </div>
@@ -186,15 +186,38 @@ export default async function HistoryEncounterPage({ params }: PageProps) {
         </Card>
       )}
 
-      {/* Clinician notes */}
-      {enc.clinicianNotes && (
+      {/* Clinician output */}
+      {(enc.clinicianNotes || enc.diagnosis || enc.prescription || enc.referral) && (
         <Card>
-          <CardContent className="p-5">
-            <h2 className="text-sm font-semibold mb-2 flex items-center gap-2 text-muted-foreground">
+          <CardContent className="p-5 space-y-4">
+            <h2 className="text-sm font-semibold flex items-center gap-2 text-muted-foreground">
               <User className="h-4 w-4" aria-hidden />
-              Clinician Notes
+              From your clinician
             </h2>
-            <p className="text-sm leading-relaxed">{enc.clinicianNotes}</p>
+            {enc.clinicianNotes && (
+              <div>
+                <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium mb-1">Notes</p>
+                <p className="text-sm leading-relaxed">{enc.clinicianNotes}</p>
+              </div>
+            )}
+            {enc.diagnosis && (
+              <div>
+                <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium mb-1">Diagnosis</p>
+                <p className="text-sm leading-relaxed">{enc.diagnosis}</p>
+              </div>
+            )}
+            {enc.prescription && (
+              <div>
+                <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium mb-1">Prescription</p>
+                <p className="text-sm leading-relaxed">{enc.prescription}</p>
+              </div>
+            )}
+            {enc.referral && (
+              <div>
+                <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium mb-1">Referral</p>
+                <p className="text-sm leading-relaxed">{enc.referral}</p>
+              </div>
+            )}
           </CardContent>
         </Card>
       )}

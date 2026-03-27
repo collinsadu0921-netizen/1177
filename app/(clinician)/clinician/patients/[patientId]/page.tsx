@@ -24,7 +24,7 @@ const SEX_LABELS: Record<string, string> = {
 const STATUS_LABELS: Record<string, string> = {
   in_progress:    "In Progress",
   pending_review: "Pending",
-  reviewed:       "In Progress",
+  reviewed:       "Reviewed",
   closed:         "Closed",
 };
 

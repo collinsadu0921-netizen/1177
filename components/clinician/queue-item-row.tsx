@@ -12,6 +12,14 @@ interface QueueItemRowProps {
   item: QueueItem;
 }
 
+const TRIAGE_LABELS: Record<string, string> = {
+  emergency:  "Emergency",
+  urgent:     "Urgent",
+  semi_urgent:"Semi-urgent",
+  non_urgent: "Non-urgent",
+  self_care:  "Self-care",
+};
+
 // Left border accent communicates urgency immediately
 const TRIAGE_ACCENT: Record<string, string> = {
   emergency:  "border-l-red-400",
@@ -67,9 +75,10 @@ export function QueueItemRow({ item }: QueueItemRowProps) {
                 <Badge
                   variant={triageBadgeVariant(item.triageLevel)}
                   size="sm"
+                  dot
                   className="shrink-0"
                 >
-                  {item.triageLevel.replace("_", " ")}
+                  {TRIAGE_LABELS[item.triageLevel] ?? item.triageLevel}
                 </Badge>
               </div>
 
